@@ -7,20 +7,11 @@ from pymodaq_gui.parameter import Parameter
 from pymodaq.control_modules.viewer_utility_classes import DAQ_Viewer_base, comon_parameters, main
 from pymodaq.utils.data import DataFromPlugins
 
-#  TODO:
-#  Replace the following fake import with the import of the real Python wrapper of your instrument. Here we suppose that
-#  the wrapper is in the hardware directory, but it could come from an external librairy like pylablib or pymeasure.
-from pymodaq_plugins_template.hardware.python_wrapper_file_of_your_instrument import PythonWrapperObjectOfYourInstrument
-
-# TODO:
-# (1) change the name of the following class to DAQ_0DViewer_TheNameOfYourChoice
-# (2) change the name of this file to daq_0Dviewer_TheNameOfYourChoice ("TheNameOfYourChoice" should be the SAME
-#     for the class name and the file name.)
-# (3) this file should then be put into the right folder, namely IN THE FOLDER OF THE PLUGIN YOU ARE DEVELOPING:
-#     pymodaq_plugins_my_plugin/daq_viewer_plugins/plugins_0D
+from pymodaq_plugins_teaching.hardware.spectrometer import Spectrometer
 
 
-class DAQ_0DViewer_Template(DAQ_Viewer_base):
+
+class DAQ_0DViewer_Photodiode(DAQ_Viewer_base):
     """ Instrument plugin class for a OD viewer.
     
     This object inherits all functionalities to communicate with PyMoDAQ’s DAQ_Viewer module through inheritance via
@@ -84,21 +75,14 @@ class DAQ_0DViewer_Template(DAQ_Viewer_base):
             False if initialization failed otherwise True
         """
 
-        raise NotImplementedError  # TODO when writing your own plugin remove this line and modify the one below
         if self.is_master:
-            self.controller = PythonWrapperObjectOfYourInstrument()  #instantiate you driver with whatever arguments are needed
-            self.controller.open_communication() # call eventual methods
-            initialized = self.controller.a_method_or_atttribute_to_check_if_init()  # TODO
+            self.controller = Spectrometer()  #instantiate you driver with whatever arguments are needed
+            #self.controller.open_communication() # call eventual methods
+            initialized = self.controller.open_communication()  # TODO
         else:
             self.controller = controller
             initialized = True
 
-        # TODO for your custom plugin (optional) initialize viewers panel with the future type of data
-        self.dte_signal_temp.emit(DataToExport(name='myplugin',
-                                               data=[DataFromPlugins(name='Mock1',
-                                                                    data=[np.array([0]), np.array([0])],
-                                                                    dim='Data0D',
-                                                                    labels=['Mock1', 'label2'])]))
 
         info = "Whatever info you want to log"
         return info, initialized
@@ -122,19 +106,13 @@ class DAQ_0DViewer_Template(DAQ_Viewer_base):
         kwargs: dict
             others optionals arguments
         """
-        ## TODO for your custom plugin: you should choose EITHER the synchrone or the asynchrone version following
 
         # synchrone version (blocking function)
-        raise NotImplementedError  # when writing your own plugin remove this line
-        data_tot = self.controller.your_method_to_start_a_grab_snap()
-        self.dte_signal.emit(DataToExport(name='myplugin',
-                                          data=[DataFromPlugins(name='Mock1', data=data_tot,
-                                                                dim='Data0D', labels=['dat0', 'data1'])]))
-        #########################################################
 
-        # asynchrone version (non-blocking function with callback)
-        raise NotImplementedError  # when writing your own plugin remove this line
-        self.controller.your_method_to_start_a_grab_snap(self.callback)  # when writing your own plugin replace this line
+        data_tot = self.controller.grab_monochromator()
+        self.dte_signal.emit(DataToExport(name='Photodiode',
+                                          data=[DataFromPlugins(name='Photodiode', data=[data_tot],
+                                                                 labels=['counts'], unit='Volts')]))
         #########################################################
 
 
@@ -147,7 +125,6 @@ class DAQ_0DViewer_Template(DAQ_Viewer_base):
 
     def stop(self):
         """Stop the current grab hardware wise if necessary"""
-        ## TODO for your custom plugin
         raise NotImplementedError  # when writing your own plugin remove this line
         self.controller.your_method_to_stop_acquisition()  # when writing your own plugin replace this line
         self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))

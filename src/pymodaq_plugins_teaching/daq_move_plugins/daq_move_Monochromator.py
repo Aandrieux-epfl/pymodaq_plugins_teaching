@@ -138,7 +138,6 @@ class DAQ_Move_Monochromator(DAQ_Move_base):
 
         value = self.check_bound(value)  #if user checked bounds, the defined bounds are applied here
         self.target_value = value
-        value = self.set_position_with_scaling(value)  # apply scaling if the user specified one
         self.controller.set_wavelength(value.value(self.axis_unit))  # when writing your own plugin replace this line
         self.emit_status(ThreadCommand('Update_Status', ['Some info you want to log']))
 
